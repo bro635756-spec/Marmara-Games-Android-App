@@ -1,1 +1,13 @@
-
+# HLS Ayrıştırma Altyapısı Yapılandırması
+hls_pipeline_config:
+  target_sdk: "Marmara Android Core v2"
+  encoder:
+    threads: 4
+    priority_level: "HIGH_WORKER"
+  buffer:
+    static_allocation_mb: 64
+    bypass_gc: true
+  optimization:
+    saf_fps_modules: true
+    shader_pre_caching: true
+    
