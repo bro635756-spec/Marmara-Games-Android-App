@@ -1,1 +1,5 @@
+=== MARMARA GAMES OFFICIAL PROMOTIONAL INDEX ===
 
+[TR] Marmara Games ekosisteminin amiral gemisi uygulamasına hoş geldiniz! SunAI akıllı asistan altyapısı ve BanaRaunt oyun modülleri ile saf performans ve ultra grafik deneyimi elinizin altında.
+[DE] Willkommen im zentralen Gaming-Hub von Marmara Games. Erleben Sie maximale FPS und die native Power unseres C++ Core-Systems.
+[FR] Bienvenue sur la plateforme centralisée de Marmara Games. Optimisation maximale de la mémoire et interface fluide de style Cyberpunk.
