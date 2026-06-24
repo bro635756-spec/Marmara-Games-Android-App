@@ -1,4 +1,4 @@
-name: Marmara Games Cloud Build
+name: Marmara Games Pure Cloud Build
 
 on:
   push:
@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Adım: Kodları bulut sunucusuna çekiyoruz
+    # 1. Adım: Depodaki tüm dosyaları bulut sunucusuna kopyalıyoruz
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    # 2. Adım: Sistemdeki Java (JDK 17) ortamını kuruyoruz
+    # 2. Adım: Derleme için gerekli olan Java (JDK 17) motorunu kuruyoruz
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -23,7 +23,7 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    # 3. Adım: Proje kök dizinini otomatik bulup Gradle derlemesini başlatıyoruz
+    # 3. Adım: Proje kök dizinini otomatik bulup Gradle motorunu ateşliyoruz
     - name: Find Gradle Root and Build Release APK
       run: |
         GRADLE_ROOT=$(find . -name "settings.gradle" -exec dirname {} \; | head -n 1)
@@ -36,6 +36,7 @@ jobs:
         echo "Gradle proje dizini bulundu: $GRADLE_ROOT"
         cd $GRADLE_ROOT
         
+        # Çalıştırma iznini kontrol edip tetikliyoruz
         if [ -f ./gradlew ]; then
           chmod +x gradlew
           ./gradlew assembleRelease
@@ -43,11 +44,11 @@ jobs:
           gradle assembleRelease
         fi
 
-    # 4. Adım: Derlenen APK dosyasını dışarı aktarıyoruz
+    # 4. Adım: Sadece oluşan .apk dosyasını indirme linki olarak çıkartıyoruz
     - name: Upload Marmara Games APK
       uses: actions/upload-artifact@v4
       with:
         name: Marmara-Games-Professional-APK
         path: |
           **/build/outputs/apk/release/*.apk
-          **/build/outputs/apk/debug/*.apk
+        
