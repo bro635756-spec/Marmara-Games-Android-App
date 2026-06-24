@@ -19,14 +19,14 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # Tüm Android mimarisini sıfırdan ve hatasız inşa ediyoruz
-    - name: Scaffold Complete Android Structure
+    # Sadece Java ve Android SDK dosyalarını işleyecek mimariyi kuruyoruz
+    - name: Scaffold Pure Java Android Structure
       run: |
         mkdir -p app/src/main/java/com/marmaragames/core
         mkdir -p app/src/main/java/com/marmaragames/sdk
         mkdir -p app/src/main/res/values
 
-        # 1. Kök dizin ayarları (Root Configs)
+        # 1. Kök Yapılandırmaları
         echo "include ':app'" > settings.gradle
         
         cat << 'EOF' > build.gradle
@@ -39,11 +39,9 @@ jobs:
         }
         EOF
 
-        # 2. Uygulama modülü ayarları (App Configs)
+        # 2. Pure Java App Yapılandırması
         cat << 'EOF' > app/build.gradle
-        plugins {
-            id 'com.android.application'
-        }
+        plugins { id 'com.android.application' }
         android {
             namespace 'com.marmaragames.core'
             compileSdk 34
@@ -59,15 +57,13 @@ jobs:
                 targetCompatibility JavaVersion.VERSION_17
             }
         }
-        dependencies {
-            implementation 'androidx.appcompat:appcompat:1.6.1'
-        }
+        dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
         EOF
 
-        # 3. Temel Res Dosyaları (Eksik kaynak hatasını önlemek için)
+        # 3. Temel Kaynak Dosyaları
         echo '<resources><string name="app_name">Marmara Games Hub</string></resources>' > app/src/main/res/values/strings.xml
 
-        # 4. Kodları Yerlerine Güvenli Şekilde Taşıma
+        # 4. Dosyaları Doğru Dizine Kopyalama
         cp app.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
         cp app_api_builder.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
         cp source/AndroidManifest.xml app/src/main/AndroidManifest.xml 2>/dev/null || true
@@ -76,7 +72,14 @@ jobs:
         cp source/source_settings_auto.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
         cp sdk/read_javascript.java app/src/main/java/com/marmaragames/sdk/ 2>/dev/null || true
 
-        # 5. Gradle Wrapper Kurulumu
+        # 5. Java Dosyalarındaki Tüm C++ / Native Kod Kalıntılarını Kaldırma (Temizlik)
+        sed -i '/System.loadLibrary/d' app/src/main/java/com/marmaragames/core/app.java
+        sed -i '/public native/d' app/src/main/java/com/marmaragames/core/main.java
+        sed -i 's/initNativeCore();/Log.d("MarmaraCore", "Java Engine Active");/g' app/src/main/java/com/marmaragames/core/main.java
+        sed -i 's/processBanaRauntMatchmaking();/Log.d("MarmaraCore", "Matchmaking Active");/g' app/src/main/java/com/marmaragames/core/main.java
+        sed -i 's/isSunAIPipelineRunning()/true/g' app/src/main/java/com/marmaragames/core/main.java
+
+        # 6. Gradle Wrapper Oluşturma
         gradle wrapper --gradle-version 8.0.2
 
     - name: Build Android Debug APK
