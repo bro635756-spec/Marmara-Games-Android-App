@@ -3,7 +3,7 @@ name: Marmara Games APK Builder
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Bu satır, telefonundan manuel olarak da derlemeyi başlatmanı sağlar.
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,19 +19,35 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # Android projesi için gerekli olan temel Gradle wrapper ve build altyapısını otomatik oluşturur
-    - name: Initialize Gradle Wrapper
+    # Dosyaları source klasöründen alıp derleme dizinine yerleştiriyoruz
+    - name: Setup Project Directories
       run: |
-        npm install -g cordova # Basit ve hızlı bir şekilde Android build araçlarını tetiklemek için alternatif
-        gradle wrapper --gradle-version 8.0
+        mkdir -p app/src/main/java/com/marmaragames/core
+        mkdir -p app/src/main/java/com/marmaragames/sdk
+        
+        # Hazırladığın kodları ve gradle yapılandırmalarını taşıyalım
+        cp source/build.gradle app/build.gradle
+        cp source/settings.gradle settings.gradle
+        cp source/AndroidManifest.xml app/src/main/AndroidManifest.xml
+        
+        cp app.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
+        cp app_api_builder.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
+        cp source/android.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
+        cp source/main.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
+        cp source/source_settings_auto.java app/src/main/java/com/marmaragames/core/ 2>/dev/null || true
+        cp sdk/read_javascript.java app/src/main/java/com/marmaragames/sdk/ 2>/dev/null || true
+
+        # Kök dizin için üst build script bağlayıcı
+        echo "buildscript { repositories { google(); mavenCentral() }; dependencies { classpath 'com.android.tools.build:gradle:8.0.2' } }" > build.gradle
+        
+        gradle wrapper --gradle-version 8.0.2
 
     - name: Build Android Debug APK
-      run: ./gradlew assembleDebug || echo "Android SDK mimari derleme tetiklendi."
+      run: ./gradlew assembleDebug
 
-    # Derlenen APK dosyasını GitHub paneline indirme linki olarak yükler
     - name: Upload Finished APK
       uses: actions/upload-artifact@v4
       with:
         name: MarmaraGames-Debug-APK
-        path: "**/build/outputs/apk/debug/*.apk"
+        path: app/build/outputs/apk/debug/*.apk
         
