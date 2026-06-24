@@ -26,7 +26,6 @@ jobs:
     # 3. Adım: Proje kök dizinini otomatik bulup Gradle derlemesini başlatıyoruz
     - name: Find Gradle Root and Build Release APK
       run: |
-        # settings.gradle dosyasının nerede olduğunu buluyoruz
         GRADLE_ROOT=$(find . -name "settings.gradle" -exec dirname {} \; | head -n 1)
         
         if [ -z "$GRADLE_ROOT" ]; then
@@ -37,7 +36,6 @@ jobs:
         echo "Gradle proje dizini bulundu: $GRADLE_ROOT"
         cd $GRADLE_ROOT
         
-        # Çalıştırma izinlerini verip derlemeyi tetikliyoruz
         if [ -f ./gradlew ]; then
           chmod +x gradlew
           ./gradlew assembleRelease
